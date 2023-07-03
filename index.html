@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <style>
+      canvas {
+        border: 1px solid #d3d3d3;
+        background-color: #f1f1f1;
+      }
+    </style>
+  </head>
+  <body onload="showStartPage()">
+    <div class="start-page">
+      <h1>SLICE FRUITS</h1>
+      <h1>Welcome to the Game!</h1>
+      <p>Instructions:</p>
+      <ul>
+        <li>Slice the green fruits by clicking on them.</li>
+        <li>Avoid the black obstacles.</li>
+        <li>Your score increases with each fruit sliced.</li>
+        <li>If you hit an obstacle, the game is over.</li>
+        <li>Also if you miss to slice more than 3 green fruits, the game is over.</li>
+      </ul>
+      <button onclick="startGame()">Start Game</button>
+    </div>
+    <div class="game-over-page">
+      <h1>Game Over</h1>
+      <p>Your Score: <span id="score"></span></p>
+      <p>Highest Score: <span id="highest-score"></span></p>
+      <button onclick="restartGame()">Play Again</button>
+    </div>
+
+    <canvas id="mycanvas"></canvas>
+
+    <script>
+      var gameInterval;
+      var gameActive = false; // Track the game state
+
+      var index_fruit = -1;
+      var index_obstacle = -1;
+      var myObstacles = [];
+      var score = 0;
+      var stopgreen = 0;
+      var highestScore = localStorage.getItem("highestScore") || 0;
+      var myFruits = [];
+      var myGameArea = {
+        canvas: document.getElementById("mycanvas"),
+        start: function () {
+          this.canvas.width = 880;
+          this.canvas.height = 570;
+          this.context = this.canvas.getContext("2d");
+          document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+          this.frameNo = 0;
+        },
+        clear: function () {
+          this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        },
+      };
+
+      function random() {
+        var rand = 830 * Math.random();
+        return rand;
+      }
+
+      function startGame() {
+        clearInterval(gameInterval);
+
+        score = 0;
+        stopgreen = 0;
+        showCanvas();
+        myGameArea.start();
+        gameInterval = setInterval(updateGameArea, 30);
+        myGameArea.canvas.addEventListener("click", handleCanvasClick);
+        gameActive = true;
+      }
+
+      function showStartPage() {
+        document.querySelector(".start-page").style.display = "block";
+        document.querySelector(".game-over-page").style.display = "none";
+        document.getElementById("mycanvas").style.display = "none";
+      }
+
+      function showGameOverPage() {
+        document.querySelector(".game-over-page").style.display = "block";
+        document.getElementById("score").textContent = score;
+        document.getElementById("highest-score").textContent = highestScore;
+        document.getElementById("mycanvas").style.display = "none";
+      }
+
+      function restartGame() {
+        clearInterval(gameInterval);
+        myObstacles = [];
+        myFruits = [];
+        startGame();
+      }
+
+      function showCanvas() {
+        document.querySelector(".start-page").style.display = "none";
+        document.querySelector(".game-over-page").style.display = "none";
+        document.getElementById("mycanvas").style.display = "block";
+      }
+
+      function component(width, height, color, x, y, type) {
+        this.type = type;
+        this.width = width;
+        this.height = height;
+        this.x = x;
+        this.y = y;
+        this.slice = false;
+        this.gravitySpeed = 0;
+        this.update = function () {
+          ctx = myGameArea.context;
+          ctx.fillStyle = color;
+          ctx.fillRect(this.x, this.y, this.width, this.height);
+        };
+        this.newPos = function () {
+          this.gravitySpeed += this.gravity;
+          this.x += this.speedX;
+          this.y += this.speedY + this.gravitySpeed;
+
+        };
+      }
+
+      function updateGameArea() {
+        myGameArea.clear();
+        if (stopgreen == 0) {
+          myGameArea.context.font = "30px Arial";
+          myGameArea.context.fillStyle = "black";
+          myGameArea.context.fillText("Score:" + score, 360, 30);
+        }
+        var x, y;
+        myGameArea.frameNo += 1;
+        if (myGameArea.frameNo == 1 || everyinterval(45)) {
+          x = myGameArea.canvas.width;
+          y = myGameArea.canvas.height - 20;
+          myObstacles.push(new component(40, 30, "black", random(), y));
+        }
+        for (j = 0; j < myObstacles.length; j += 1) {
+          myObstacles[j].speedX = -0.5;
+          myObstacles[j].speedY = -20;
+          myObstacles[j].gravity = 0.5;
+        }
+
+        if (stopgreen == 0) {
+          for (j = 0; j < myObstacles.length; j += 1) {
+            if (!myObstacles[j].slice) {
+              myObstacles[j].update();
+              myObstacles[j].newPos();
+            }
+          }
+        }
+        if (myGameArea.frameNo == 1 || everyinterval(25)) {
+          x = myGameArea.canvas.width;
+          y = myGameArea.canvas.height - 20;
+          myFruits.push(new component(40, 30, "green", random(), y));
+        }
+        for (i = 0; i < myFruits.length; i += 1) {
+          myFruits[i].speedX = 0.6;
+          myFruits[i].speedY = -22;
+          myFruits[i].gravity = 0.6;
+        }
+        if (stopgreen == 0) {
+          for (i = 0; i < myFruits.length; i++) {
+
+            if (i>score+4){
+              stopgreen=1;
+              showGameOverPage();
+            }
+            if (!myFruits[i].slice) {
+              myFruits[i].update();
+              myFruits[i].newPos();
+            }
+          }
+        }
+        
+      }
+
+      function handleCanvasClick(event) {
+        if (!gameActive) return;
+
+        var mouseX = event.clientX - myGameArea.canvas.offsetLeft;
+        var mouseY = event.clientY - myGameArea.canvas.offsetTop;
+        for (var i = 0; i < myFruits.length; i++) {
+          var dx = myFruits[i].x - mouseX;
+          var dy = myFruits[i].y - mouseY;
+          var distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < myFruits[i].width && myFruits[i].x < mouseX) {
+            myFruits[i].slice = true;
+            myFruits[i].x = -100;
+            score++;
+            console.log(score);
+          }
+        }
+
+        for (var j = 0; j < myObstacles.length; j++) {
+          var dx2 = myObstacles[j].x - mouseX;
+          var dy2 = myObstacles[j].y - mouseY;
+
+          var distance2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+          if (distance2 < myObstacles[j].width && myObstacles[j].x < mouseX) {
+            myObstacles[j].slice = true;
+            myObstacles[j].x = -100;
+            stopgreen = 1;
+            if (score > highestScore) {
+              highestScore = score;
+              localStorage.setItem("highestScore", highestScore);
+            }
+            clearInterval(gameInterval);
+            showGameOverPage();
+            break;
+          }
+        }
+      }
+
+      function everyinterval(n) {
+        if ((myGameArea.frameNo / n) % 1 == 0) {
+          return true;
+        }
+        return false;
+      }
+    </script>
+  </body>
+</html>

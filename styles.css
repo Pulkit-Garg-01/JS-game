@@ -1,0 +1,90 @@
+.start-page,
+.game-over-page {
+  display: none;
+  text-align: center;
+  margin: auto;
+  padding-top: 50px;
+  /* width: 300px; */
+}
+.start-page h1 {
+    font-size: 5rem;
+    /* margin-bottom: 20px; */
+}
+canvas {
+  display: block;
+  margin: 2em auto;
+  border: 1px solid black;
+}
+
+
+
+
+
+canvas {
+    border: 1px solid #d3d3d3;
+    background-color: #f1f1f1;
+  }
+  
+  .start-page {
+    text-align: center;
+    margin-top: 40px;
+  }
+  
+  
+  
+  .start-page p {
+    font-size: 40px;
+    margin-bottom: 10px;
+    font-weight: bolder;
+}
+  
+  .start-page ul {
+    text-align: left;
+    margin-left: 50px;
+    margin-bottom: 30px;
+    font-size: 2rem;
+  }
+  
+  .start-page button {
+    font-size: 24px;
+    padding: 10px 20px;
+  }
+  
+  .game-over-page {
+    display: none;
+    text-align: center;
+    margin-top: 100px;
+  }
+  
+  .game-over-page h1 {
+    font-size: 4rem;
+    margin-bottom: 20px;
+  }
+  
+  .game-over-page p {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  
+  .game-over-page button {
+    font-size: 45px;
+    padding: 14px 23px;
+  }
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
